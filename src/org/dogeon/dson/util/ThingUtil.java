@@ -1,7 +1,9 @@
 package org.dogeon.dson.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Date;
 
 public class ThingUtil
 {
@@ -12,13 +14,27 @@ public class ThingUtil
         else
         {
             Class<?> suchClass = thing.getClass();
-            if ((suchClass.isPrimitive()) || (suchClass == String.class))
+            if ((thing instanceof Number) || (suchClass == Boolean.class) || (suchClass == Character.class) || (suchClass == String.class) || (suchClass == Date.class))
                 visitor.visitValue(thing);
-            else if ((suchClass.isArray()) || (Iterable.class.isAssignableFrom(suchClass)))
+            else if (suchClass.isArray()) 
             {
                 visitor.visitSuchList();
+                for (int i=0; i<Array.getLength(thing); i++)
+                {
+                    visitor.visitItem(i);
+                    walkThing(Array.get(thing, i), visitor);
+                }
+                visitor.visitListWow();
+            }
+            else if (Iterable.class.isAssignableFrom(suchClass))
+            {
+                visitor.visitSuchList();
+                int i = 0;
                 for (Object nextItem : (Iterable<?>)thing)
+                {
+                    visitor.visitItem(i++);
                     walkThing(nextItem, visitor);
+                }
                 visitor.visitListWow();
             }
             else

@@ -1,10 +1,15 @@
 package org.dogeon.dson.speaking;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.dogeon.dson.Words;
 import org.dogeon.dson.util.ThingVisitor;
 
 public class VerySpeakWow implements ThingVisitor
 {
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    
     private StringBuilder result = new StringBuilder();
 
     public String getSpeak()
@@ -19,17 +24,33 @@ public class VerySpeakWow implements ThingVisitor
 
     public void visitValue(Object value)
     {
-        if (value instanceof Boolean)
-            result.append((Boolean)value ? Words.YES_VALUE : Words.NO_VALUE);
+        Class<?> valueClass = value.getClass();
+        if ((valueClass == Byte.class) || (valueClass == Short.class) || (valueClass == Integer.class) || (valueClass == Long.class))
+        {
+            long longValue = ((Number)value).longValue();
+            addToken((longValue < 0 ? "-" : "") + String.format("%1$o", Math.abs(longValue)));
+        }
+        else if ((valueClass == Float.class) || (valueClass == Double.class))
+        {
+            double doubleValue = ((Number)value).doubleValue(); 
+            double absValue = Math.abs(doubleValue);
+            addToken((doubleValue < 0 ? "-" : "") + String.format("%1$o.%2$s", (long)absValue, fractionToOctal(absValue - (long)absValue)));
+        }
+        else if (valueClass == Boolean.class)
+            addToken((Boolean)value ? Words.YES_VALUE : Words.NO_VALUE);
+        else if (valueClass == Date.class)
+            addToken(Words.qualifyString(dateFormat.format((Date)value)));
+        else if ((valueClass == String.class) || (valueClass == Character.class))
+            addToken(Words.qualifyString(value.toString()));
         else
-            result.append(value instanceof String ? qualify(value.toString()) : value);
+            addToken(value.toString());
     }
 
     public void visitMember(String name, boolean isFirst)
     {
         if (!isFirst)
             addToken(Words.choose(Words.MEMBER_SEPARATORS));
-        result.append(qualify(name));
+        result.append('"' + name + '"');
         addToken(Words.VALUE_SEPARATOR);
     }
 
@@ -53,16 +74,35 @@ public class VerySpeakWow implements ThingVisitor
         addToken(Words.LIST_END);
     }
     
-    private void addToken(String token)
+    public void visitItem(int index)
     {
-        if ((result.length() != 0) && (Words.suchTokenIsWord(token)))
-            result.append(' ');
-        result.append(token);
+        if (index > 0)
+            addToken(Words.ITEM_SEPARATORS[index == 1 ? 0 : 1]);
     }
     
     
-    private static String qualify(String s)
+    private void addToken(String token)
     {
-        return '"' + s + '"';
+        if ((result.length() != 0) && 
+                ((Words.suchTokenIsWord(token)) || (token.charAt(0) == '"') || 
+                 (Character.isLetter(result.charAt(result.length() - 1)) || (result.charAt(result.length() - 1) == '"'))))
+        {
+            result.append(' ');
+        }
+        result.append(token);
+    }
+    
+    private String fractionToOctal(double fraction)
+    {
+        StringBuilder s = new StringBuilder();
+        do
+        {
+            fraction*=8;
+            int digit = (int)fraction;
+            s.append(digit);
+            fraction-=digit;
+        }
+        while ((fraction > 0) && (s.length() < 10));
+        return s.toString();
     }
 }
