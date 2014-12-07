@@ -3,7 +3,10 @@ package org.dogeon.dson.util;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Map;
 
 public class ThingUtil
 {
@@ -37,33 +40,72 @@ public class ThingUtil
                 }
                 visitor.visitListWow();
             }
+            else if (thing instanceof Map)
+            {
+                Map<?, ?> m = (Map<?, ?>)thing;
+                visitor.visitSuchComposite();
+                String[] memberNames = m.keySet().toArray(new String[0]);
+                Arrays.sort(memberNames);
+                for (int i=0; i<memberNames.length; i++)
+                {
+                    visitor.visitMember(memberNames[i], i);
+                    walkThing(m.get(memberNames[i]), visitor);
+                }
+                visitor.visitCompositeWow();
+            }
             else
             {
                 visitor.visitSuchComposite();
-                boolean isFirstMember = true;
-                for (Method nextMethod : suchClass.getMethods())
+                int i = 0;
+                Method[] methods = suchClass.getMethods();
+                Arrays.sort(methods, new MethodNameComparator());
+                for (Method nextMethod : methods)
                 {
-                    String methodName = nextMethod.getName(); 
-                    if ((((methodName.startsWith("get")) && (nextMethod.getReturnType() != Void.class)) || 
-                            ((methodName.startsWith("is")) && (nextMethod.getReturnType() == Boolean.class))) && 
+                    String methodName = nextMethod.getName();
+                    if ((((methodName.startsWith("get")) && (!methodName.equals("getClass")) && (nextMethod.getReturnType() != Void.class)) || 
+                            ((methodName.startsWith("is")) && (nextMethod.getReturnType() == boolean.class))) && 
                             (nextMethod.getParameterTypes().length == 0) && ((nextMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC))
                     {
-                        visitor.visitMember(methodName.startsWith("get") ? methodName.substring(3) : methodName.substring(2), isFirstMember);
+                        visitor.visitMember(getMethodSubjectName(nextMethod), i++);
                         Object memberValue = null;
                         try
                         {
                             memberValue = nextMethod.invoke(thing);
-                        } 
+                        }
                         catch (Exception e)
                         {
                             e.printStackTrace();
                         }
                         walkThing(memberValue, visitor);
-                        isFirstMember = false;
                     }
                 }
                 visitor.visitCompositeWow();
             }
+        }
+    }
+    
+    
+    private static String getMethodSubjectName(Method method)
+    {
+        String subjectName;
+        String methodName = method.getName(); 
+        if (methodName.startsWith("get"))
+            subjectName = methodName.substring(3);
+        else if (methodName.startsWith("is"))
+            subjectName = methodName.substring(2);
+        else
+            subjectName = methodName;
+        
+        if ((subjectName.length() > 1) && (Character.isLowerCase(subjectName.charAt(1))))
+            subjectName = Character.toLowerCase(subjectName.charAt(0)) + subjectName.substring(1);
+        return subjectName;
+    }
+    
+    private static class MethodNameComparator implements Comparator<Method>
+    {
+        public int compare(Method o1, Method o2)
+        {
+            return getMethodSubjectName(o1).compareTo(getMethodSubjectName(o2));
         }
     }
 }

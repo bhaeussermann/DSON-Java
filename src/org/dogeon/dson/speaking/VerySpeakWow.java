@@ -46,11 +46,11 @@ public class VerySpeakWow implements ThingVisitor
             addToken(value.toString());
     }
 
-    public void visitMember(String name, boolean isFirst)
+    public void visitMember(String name, int index)
     {
-        if (!isFirst)
-            addToken(Words.choose(Words.MEMBER_SEPARATORS));
-        result.append('"' + name + '"');
+        if (index > 0)
+            addToken(Words.MEMBER_SEPARATORS[(index - 1) % 4]);
+        addToken('"' + name + '"');
         addToken(Words.VALUE_SEPARATOR);
     }
 
@@ -84,15 +84,19 @@ public class VerySpeakWow implements ThingVisitor
     private void addToken(String token)
     {
         if ((result.length() != 0) && 
-                ((Words.suchTokenIsWord(token)) || (token.charAt(0) == '"') || 
-                 (Character.isLetter(result.charAt(result.length() - 1)) || (result.charAt(result.length() - 1) == '"'))))
+                (isSeparatableCharacter(token.charAt(0))) && (isSeparatableCharacter(result.charAt(result.length() - 1))))
         {
             result.append(' ');
         }
         result.append(token);
     }
     
-    private String fractionToOctal(double fraction)
+    private static boolean isSeparatableCharacter(char c)
+    {
+        return (Character.isLetterOrDigit(c)) || (c == '"'); 
+    }
+    
+    private static String fractionToOctal(double fraction)
     {
         StringBuilder s = new StringBuilder();
         do

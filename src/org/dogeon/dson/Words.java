@@ -1,14 +1,11 @@
 package org.dogeon.dson;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import org.dogeon.dson.util.Pair;
 
 public class Words
 {
-    private static final Random generator = new Random();
-    
     public static final String THING_BEGIN = "such", THING_END = "wow";
     public static final String VALUE_SEPARATOR = "is";
     public static final String[] MEMBER_SEPARATORS = new String[] { ",", ".", "!", "?" };
@@ -28,16 +25,6 @@ public class Words
         QUALIFY_REPLACEMENTS.add(new Pair<String, String>("\n", "\\n"));
         QUALIFY_REPLACEMENTS.add(new Pair<String, String>("\r", "\\r"));
         QUALIFY_REPLACEMENTS.add(new Pair<String, String>("\t", "\\t"));
-    }
-    
-    public static String choose(String[] tokens)
-    {
-        return tokens[generator.nextInt(tokens.length)];
-    }
-    
-    public static boolean suchTokenIsWord(String token)
-    {
-        return Character.isLetter(token.charAt(0));
     }
     
     public static String qualifyString(String s)
