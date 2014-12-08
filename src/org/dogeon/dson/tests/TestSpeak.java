@@ -7,8 +7,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import org.dogeon.dson.Shibe;
-import org.dogeon.dson.model.DogeList;
-import org.dogeon.dson.model.DogeThing;
 import org.junit.Test;
 
 public class TestSpeak
@@ -44,14 +42,15 @@ public class TestSpeak
     @Test
     public void testThing()
     {
-        assertSpeak("such \"info\" is such \"and\" is \"also\",\"doge\" is yes.\"many\" is \"wow\"!\"shiba\" is \"inu\"?\"so\" is \"many\",\"such\" is \"is\" wow wow", new Animal(new AnimalInfo("inu", true)));
+        assertSpeak("such \"info\" is such \"and\" is \"also\",\"doge\" is yes.\"many\" is \"wow\"!\"shiba\" is \"inu\"?\"so\" is \"many\",\"such\" is empty wow wow", new Animal(new AnimalInfo("inu", true)));
         
         HashMap<String, Object> inner = new HashMap<String, Object>();
         inner.put("shiba", "inu");
         inner.put("doge", true);
+        inner.put("such", null);
         HashMap<String, Object> thing = new HashMap<String, Object>();
         thing.put("info", inner);
-        assertSpeak("such \"info\" is such \"doge\" is yes,\"shiba\" is \"inu\" wow wow", thing);
+        assertSpeak("such \"info\" is such \"doge\" is yes,\"shiba\" is \"inu\".\"such\" is empty wow wow", thing);
     }
     
     
@@ -100,7 +99,7 @@ public class TestSpeak
         
         public String getSuch()
         {
-            return "is";
+            return null;
         }
         
         public String getSo()

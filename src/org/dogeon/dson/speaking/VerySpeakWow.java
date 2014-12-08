@@ -8,8 +8,6 @@ import org.dogeon.dson.util.ThingVisitor;
 
 public class VerySpeakWow implements ThingVisitor
 {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    
     private StringBuilder result = new StringBuilder();
 
     public String getSpeak()
@@ -39,7 +37,7 @@ public class VerySpeakWow implements ThingVisitor
         else if (valueClass == Boolean.class)
             addToken((Boolean)value ? Words.YES_VALUE : Words.NO_VALUE);
         else if (valueClass == Date.class)
-            addToken(Words.qualifyString(dateFormat.format((Date)value)));
+            addToken(Words.qualifyString(Words.DATE_FORMAT.format((Date)value)));
         else if ((valueClass == String.class) || (valueClass == Character.class))
             addToken(Words.qualifyString(value.toString()));
         else
