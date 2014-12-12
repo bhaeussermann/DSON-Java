@@ -18,6 +18,8 @@ public class VeryWordFind
     private char nextChar = NULL_CHAR;
     private boolean foundEndOfStream = false;
     
+    private Word nextWord;
+    
     public VeryWordFind(Reader reader)
     {
         this.reader = reader;
@@ -28,14 +30,32 @@ public class VeryWordFind
         this(new StringReader(dson));
     }
     
+    public Word peekWord() throws IOException, MakeSenseException
+    {
+        return getNextWord();
+    }
+    
     public Word nextWord() throws IOException, MakeSenseException
     {
-        Word word = getWordLeaveTrailingWhitespace();
+        Word word = getNextWord();
+        findNextWord();
+        return word;
+    }
+    
+    private Word getNextWord() throws IOException, MakeSenseException
+    {
+        if (nextChar == NULL_CHAR)
+            findNextWord();
+        return nextWord;
+    }
+    
+    private void findNextWord() throws IOException, MakeSenseException
+    {
+        nextWord = getWordLeaveTrailingWhitespace();
         if (!foundEndOfStream)
         {
             while ((Character.isWhitespace(nextChar)) && (readNextChar())) ;
         }
-        return word;
     }
     
     private Word getWordLeaveTrailingWhitespace() throws IOException, MakeSenseException

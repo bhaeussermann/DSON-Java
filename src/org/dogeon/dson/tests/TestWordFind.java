@@ -16,38 +16,46 @@ public class TestWordFind
     public void test() throws IOException, MakeSenseException
     {
         VeryWordFind finder = new VeryWordFind("such \"foo\" is  so \"bar\" also -15.3 and \"fizz - \\\"buzz\\\"\" many, \"doge\" is yes.\"many\" is 42very3 wow");
-        assertWord(WordType.THING_BEGIN, finder.nextWord());
-        assertWord(WordType.VALUE, "foo", finder.nextWord());
-        assertWord(WordType.VALUE_SEPARATOR, finder.nextWord());
-        assertWord(WordType.LIST_BEGIN, finder.nextWord());
-        assertWord(WordType.VALUE, "bar", finder.nextWord());
-        assertWord(WordType.ITEM_SEPARATOR, finder.nextWord());
-        assertWord(WordType.VALUE, -13.375, finder.nextWord());
-        assertWord(WordType.ITEM_SEPARATOR, finder.nextWord());
-        assertWord(WordType.VALUE, "fizz - \"buzz\"", finder.nextWord());
-        assertWord(WordType.LIST_END, finder.nextWord());
-        assertWord(WordType.MEMBER_SEPARATOR, finder.nextWord());
-        assertWord(WordType.VALUE, "doge", finder.nextWord());
-        assertWord(WordType.VALUE_SEPARATOR, finder.nextWord());
-        assertWord(WordType.VALUE, true, finder.nextWord());
-        assertWord(WordType.MEMBER_SEPARATOR, finder.nextWord());
-        assertWord(WordType.VALUE, "many", finder.nextWord());
-        assertWord(WordType.VALUE_SEPARATOR, finder.nextWord());
-        assertWord(WordType.VALUE, 34l, finder.nextWord());
-        assertWord(WordType.VERY, finder.nextWord());
-        assertWord(WordType.VALUE, 3l, finder.nextWord());
-        assertWord(WordType.THING_END, finder.nextWord());
+        assertNextWord(WordType.THING_BEGIN, finder);
+        assertNextWord(WordType.VALUE, "foo", finder);
+        assertNextWord(WordType.VALUE_SEPARATOR, finder);
+        assertNextWord(WordType.LIST_BEGIN, finder);
+        assertNextWord(WordType.VALUE, "bar", finder);
+        assertNextWord(WordType.ITEM_SEPARATOR, finder);
+        assertNextWord(WordType.VALUE, -13.375, finder);
+        assertNextWord(WordType.ITEM_SEPARATOR, finder);
+        assertNextWord(WordType.VALUE, "fizz - \"buzz\"", finder);
+        assertNextWord(WordType.LIST_END, finder);
+        assertNextWord(WordType.MEMBER_SEPARATOR, finder);
+        assertNextWord(WordType.VALUE, "doge", finder);
+        assertNextWord(WordType.VALUE_SEPARATOR, finder);
+        assertNextWord(WordType.VALUE, true, finder);
+        assertNextWord(WordType.MEMBER_SEPARATOR, finder);
+        assertNextWord(WordType.VALUE, "many", finder);
+        assertNextWord(WordType.VALUE_SEPARATOR, finder);
+        assertNextWord(WordType.VALUE, 34l, finder);
+        assertNextWord(WordType.VERY, finder);
+        assertNextWord(WordType.VALUE, 3l, finder);
+        assertNextWord(WordType.THING_END, finder);
+        assertNull(finder.peekWord());
         assertNull(finder.nextWord());
     }
     
-    private void assertWord(WordType expectedWordType, Word word)
+    private void assertNextWord(WordType expectedWordType, VeryWordFind finder) throws IOException, MakeSenseException
     {
-        assertEquals(expectedWordType, word.getWordType());
+        assertNextWord(expectedWordType, null, finder);
+    }
+    
+    private void assertNextWord(WordType expectedWordType, Object expectedWordValue, VeryWordFind finder) throws IOException, MakeSenseException
+    {
+        assertWord(expectedWordType, expectedWordValue, finder.peekWord());
+        assertWord(expectedWordType, expectedWordValue, finder.nextWord());
     }
     
     private void assertWord(WordType expectedWordType, Object expectedWordValue, Word word)
     {
         assertEquals(expectedWordType, word.getWordType());
-        assertEquals(expectedWordValue, word.getWordValue());
+        if (expectedWordValue != null)
+            assertEquals(expectedWordValue, word.getWordValue());
     }
 }
