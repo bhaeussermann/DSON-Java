@@ -3,6 +3,9 @@ package org.dogeon.dson.makesense;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.dogeon.dson.Words;
+import org.dogeon.dson.makesense.Word.WordType;
+
 public class WordParser
 {
     private VeryWordFind wordFinder;
@@ -26,7 +29,79 @@ public class WordParser
     {
         switch (wordFinder.peekWord().getWordType())
         {
-            
+	        case VALUE : parseValue(visitor); break; 
+	        case THING_BEGIN : parseThing(visitor); break;
+	        case LIST_BEGIN : parseList(visitor); break;
+	        default : throw new MakeSenseException("Unexpected " + wordFinder.peekWord());
         }
+    }
+    
+    private void parseValue(ThingVisitor visitor) throws IOException, MakeSenseException
+    {
+    	Object value = wordFinder.nextWord().getWordValue();
+    	if (wordFinder.peekWord().getWordType() == WordType.VERY)
+    	{
+    		wordFinder.nextWord();
+    		Object veryValue = wordFinder.nextWord().getWordValue();
+    		value = Math.pow(value instanceof Long ? (Long)value : (Double)value, veryValue instanceof Long ? (Long)veryValue : (Double)veryValue);
+    	}
+    	visitor.visitValue(value);
+    }
+    
+    private void parseThing(ThingVisitor visitor) throws IOException, MakeSenseException
+    {
+    	visitor.visitSuchComposite();
+    	wordFinder.nextWord();
+    	if (wordFinder.peekWord().getWordType() == WordType.VALUE)
+    		parseMemberList(visitor);
+    	if (wordFinder.peekWord().getWordType() != WordType.THING_END)
+    		throw new MakeSenseException("Expected " + Words.THING_END + "; was " + wordFinder.peekWord() + '.');
+    	wordFinder.nextWord();
+    	visitor.visitCompositeWow();
+    }
+    
+    private void parseMemberList(ThingVisitor visitor) throws IOException, MakeSenseException
+    {
+    	while (true)
+    	{
+	    	Object memberNameValue = wordFinder.nextWord().getWordValue();
+	    	if (memberNameValue instanceof String)
+	    		visitor.visitMember((String)memberNameValue);
+	    	else
+	    		throw new MakeSenseException("Member name must be a string. Value was " + memberNameValue + '.');
+	    	if (wordFinder.peekWord().getWordType() != WordType.VALUE_SEPARATOR)
+	    		throw new MakeSenseException("Expected " + Words.VALUE_SEPARATOR + "; was " + wordFinder.peekWord() + '.');
+	    	wordFinder.nextWord();
+	    	parseDson(visitor);
+	    	
+	    	if (wordFinder.peekWord().getWordType() != WordType.MEMBER_SEPARATOR)
+	    		return;
+    		wordFinder.nextWord();
+    	}
+    }
+    
+    private void parseList(ThingVisitor visitor) throws IOException, MakeSenseException
+    {
+    	visitor.visitSuchList();
+    	wordFinder.nextWord();
+    	if (wordFinder.peekWord().getWordType() != WordType.LIST_END)
+    	{
+    		parseElements(visitor);
+    		if (wordFinder.peekWord().getWordType() != WordType.LIST_END)
+    			throw new MakeSenseException("Expected " + Words.LIST_END + ": was " + wordFinder.peekWord() + '.');
+    	}
+    	wordFinder.nextWord();
+    	visitor.visitListWow();
+    }
+    
+    private void parseElements(ThingVisitor visitor) throws IOException, MakeSenseException
+    {
+    	while (true)
+    	{
+    		parseDson(visitor);
+    		if (wordFinder.peekWord().getWordType() != WordType.ITEM_SEPARATOR)
+	    		return;
+    		wordFinder.nextWord();
+    	}
     }
 }

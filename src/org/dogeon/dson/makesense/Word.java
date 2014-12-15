@@ -32,4 +32,9 @@ public class Word
     {
         return wordValue;
     }
+    
+    public String toString()
+    {
+    	return wordValue == null ? wordType.toString() : wordType + ": " + wordValue;
+    }
 }

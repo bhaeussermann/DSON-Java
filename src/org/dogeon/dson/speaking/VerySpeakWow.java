@@ -1,6 +1,5 @@
 package org.dogeon.dson.speaking;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.dogeon.dson.Words;
