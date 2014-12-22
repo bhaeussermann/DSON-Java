@@ -24,9 +24,10 @@ public class BuilderVisitor implements ThingVisitor
 		contextStack.peek().putValue(value);
 	}
 
-	public void visitMember(String name) 
+	public boolean visitMember(String name) 
 	{
 		((ThingBuilderContext)contextStack.peek()).setCurrentMemberName(name);
+		return true;
 	}
 
 	public void visitSuchComposite() 

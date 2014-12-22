@@ -8,4 +8,9 @@ public class MakeSenseException extends Exception
     {
         super(message);
     }
+    
+    public MakeSenseException(Exception inner)
+    {
+    	super(inner);
+    }
 }

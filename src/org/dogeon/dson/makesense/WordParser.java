@@ -64,15 +64,16 @@ public class WordParser
     {
     	while (true)
     	{
+    		boolean doVisitMember;
 	    	Object memberNameValue = wordFinder.nextWord().getWordValue();
 	    	if (memberNameValue instanceof String)
-	    		visitor.visitMember((String)memberNameValue);
+	    		doVisitMember = visitor.visitMember((String)memberNameValue);
 	    	else
 	    		throw new MakeSenseException("Member name must be a string. Value was " + memberNameValue + '.');
 	    	if (wordFinder.peekWord().getWordType() != WordType.VALUE_SEPARATOR)
 	    		throw new MakeSenseException("Expected " + Words.VALUE_SEPARATOR + "; was " + wordFinder.peekWord() + '.');
 	    	wordFinder.nextWord();
-	    	parseDson(visitor);
+	    	parseDson(doVisitMember ? visitor : new DummyVisitor());
 	    	
 	    	if (wordFinder.peekWord().getWordType() != WordType.MEMBER_SEPARATOR)
 	    		return;
@@ -103,5 +104,21 @@ public class WordParser
 	    		return;
     		wordFinder.nextWord();
     	}
+    }
+    
+    
+    private static class DummyVisitor implements ThingVisitor
+    {
+		public void visitValue(Object value) {}
+
+		public boolean visitMember(String name) 
+		{
+			return true;
+		}
+
+		public void visitSuchComposite() {}
+		public void visitCompositeWow() {}
+		public void visitSuchList() {}
+		public void visitListWow() {}
     }
 }
