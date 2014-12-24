@@ -13,7 +13,12 @@ public class InstantiatorVisitor implements ThingVisitor
 	
 	public InstantiatorVisitor(Class<?> c)
 	{
-		contextStack.push(new RootContext(c));
+	    this(c, null);
+	}
+	
+	public InstantiatorVisitor(Class<?> c, Class<?> componentClass)
+	{
+		contextStack.push(new RootContext(c, componentClass));
 	}
 	
 	public Object getBuiltValue()
@@ -49,8 +54,8 @@ public class InstantiatorVisitor implements ThingVisitor
 	{
 		InstantiatorContext context = contextStack.peek();
 		Object componentInstance = context.getComponentInstance();
-		ParameterizedType parameterizedType = context.getComponentParameterizedType();
-		InstantiatorContext newContext = componentInstance == null ? new ListContext(context.getComponentClass(), parameterizedType) : new ListContext(componentInstance, parameterizedType);
+		Class<?> componentClassOfComponent = context.getComponentClassComponentClass();
+		InstantiatorContext newContext = componentInstance == null ? new ListContext(context.getComponentClass(), componentClassOfComponent) : new ListContext(componentInstance, componentClassOfComponent);
 		context.putValue(newContext.getBuilt());
 		contextStack.push(newContext);
 	}
@@ -66,18 +71,19 @@ public class InstantiatorVisitor implements ThingVisitor
 		public Object getBuilt();
 		public Object getComponentInstance();
 		public Class<?> getComponentClass();
-		public ParameterizedType getComponentParameterizedType();
+		public Class<?> getComponentClassComponentClass();
 		public void putValue(Object value);
 	}
 	
 	private static class RootContext implements InstantiatorContext
 	{
-		private Class<?> c;
+		private Class<?> c, componentClass;
 		private Object value;
 
-		public RootContext(Class<?> c)
+		public RootContext(Class<?> c, Class<?> componentClass)
 		{
 			this.c = c;
+			this.componentClass = componentClass;
 		}
 		
 		public Object getBuilt()
@@ -95,9 +101,9 @@ public class InstantiatorVisitor implements ThingVisitor
 			return c;
 		}
 		
-		public ParameterizedType getComponentParameterizedType()
+		public Class<?> getComponentClassComponentClass()
 		{
-			return null;
+			return componentClass;
 		}
 		
 		public void putValue(Object value) 
@@ -175,10 +181,11 @@ public class InstantiatorVisitor implements ThingVisitor
 			return currentGetterMethod == null ? currentSetterMethod.getParameterTypes()[0] : currentGetterMethod.getReturnType();
 		}
 		
-		public ParameterizedType getComponentParameterizedType()
+		public Class<?> getComponentClassComponentClass()
 		{
 			
-			return (ParameterizedType)(currentGetterMethod == null ? currentSetterMethod.getGenericParameterTypes()[0] : currentGetterMethod.getGenericReturnType());
+		    ParameterizedType type = (ParameterizedType)(currentGetterMethod == null ? currentSetterMethod.getGenericParameterTypes()[0] : currentGetterMethod.getGenericReturnType());
+		    return (Class<?>)type.getActualTypeArguments()[0];
 		}
 		
 		public void putValue(Object value) 
@@ -197,16 +204,15 @@ public class InstantiatorVisitor implements ThingVisitor
 	
 	private static class ListContext implements InstantiatorContext
 	{
-		private Class<?> listClass;
-		private ParameterizedType listParameterizedType;
+		private Class<?> listClass, componentClass;
 		private Object list;
 		private Method adderMethod;
 		
-		public ListContext(Object list, ParameterizedType listParameterizedType) throws MakeSenseException
+		public ListContext(Object list, Class<?> componentClass) throws MakeSenseException
 		{
 			this.list = list;
 			listClass = list.getClass();
-			this.listParameterizedType = listParameterizedType;
+			this.componentClass = componentClass;
 			try
 			{
 				adderMethod = listClass.getMethod("add", Object.class);
@@ -217,9 +223,9 @@ public class InstantiatorVisitor implements ThingVisitor
 			}
 		}
 		
-		public ListContext(Class<?> listClass, ParameterizedType listParameterizedType) throws MakeSenseException
+		public ListContext(Class<?> listClass, Class<?> componentClass) throws MakeSenseException
 		{
-			this(makeListInstance(listClass), listParameterizedType);
+			this(makeListInstance(listClass), componentClass);
 		}
 		
 		private static Object makeListInstance(Class<?> listClass) throws MakeSenseException
@@ -246,10 +252,10 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public Class<?> getComponentClass()
 		{
-			return (Class<?>)listParameterizedType.getActualTypeArguments()[0];
+			return componentClass;
 		}
 		
-		public ParameterizedType getComponentParameterizedType()
+		public Class<?> getComponentClassComponentClass()
 		{
 			return null;
 		}

@@ -40,9 +40,14 @@ public class Shibe
     
     public static Object makeSense(String dson, Class<?> c) throws MakeSenseException
     {
+        return makeSense(dson, c, null);
+    }
+    
+    public static Object makeSense(String dson, Class<?> c, Class<?> componentClass) throws MakeSenseException
+    {
     	try 
     	{
-			return makeSense(new StringReader(dson), c);
+			return makeSense(new StringReader(dson), c, componentClass);
 		} 
     	catch (IOException e) {}
     	return null;
@@ -50,7 +55,12 @@ public class Shibe
     
     public static Object makeSense(Reader reader, Class<?> c) throws IOException, MakeSenseException
     {
-    	InstantiatorVisitor builder = new InstantiatorVisitor(c);
+        return makeSense(reader, c, null);
+    }
+    
+    public static Object makeSense(Reader reader, Class<?> c, Class<?> componentClass) throws IOException, MakeSenseException
+    {
+    	InstantiatorVisitor builder = new InstantiatorVisitor(c, componentClass);
     	WordParser parser = new WordParser(reader);
     	parser.parse(builder);
     	return builder.getBuiltValue();

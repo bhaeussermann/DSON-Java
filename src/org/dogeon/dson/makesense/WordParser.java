@@ -39,7 +39,7 @@ public class WordParser
     private void parseValue(ThingVisitor visitor) throws IOException, MakeSenseException
     {
     	Object value = wordFinder.nextWord().getWordValue();
-    	if (wordFinder.peekWord().getWordType() == WordType.VERY)
+    	if ((wordFinder.peekWord() != null) && (wordFinder.peekWord().getWordType() == WordType.VERY))
     	{
     		wordFinder.nextWord();
     		Object veryValue = wordFinder.nextWord().getWordValue();
