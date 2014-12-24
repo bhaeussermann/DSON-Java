@@ -1,5 +1,6 @@
 package org.dogeon.dson.makesense;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -116,6 +117,7 @@ public class InstantiatorVisitor implements ThingVisitor
 	{
 		private Class<?> c;
 		private Object thing;
+		private Field currentField;
 		private Method currentGetterMethod, currentSetterMethod;
 		
 		public ThingContext(Object thing)
@@ -147,6 +149,14 @@ public class InstantiatorVisitor implements ThingVisitor
 					currentSetterMethod = nextMethod;
 					return true;
 				}
+			
+			for (Field nextField : c.getFields())
+			    if (((nextField.getModifiers() & Method.PUBLIC) == Method.PUBLIC) && (nextField.getName().equals(memberName)))
+	            {
+			        currentField = nextField;
+			        return true;
+	            }
+			
 			String getterMethodName = "get" + Character.toUpperCase(memberName.charAt(0)) + memberName.substring(1);
 			try 
 			{
@@ -194,6 +204,8 @@ public class InstantiatorVisitor implements ThingVisitor
 			{
 				if (currentSetterMethod != null)
 					currentSetterMethod.invoke(thing, value);
+				else if (currentField != null)
+				    currentField.set(thing, value);
 			} 
 			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
 			{

@@ -148,20 +148,9 @@ public class TestMakeSense
 	
 	public static class Visitor 
 	{
-		// TODO: support public fields.
-		private Date checkinDate;
+		public Date checkinDate;
 		private double account;
 		private AnimalInfo animalInfo;
-		
-		public Date getCheckinDate()
-		{
-			return checkinDate;
-		}
-		
-		public void setCheckinDate(Date newCheckinDate)
-		{
-			checkinDate = newCheckinDate;
-		}
 		
 		public double getAccount()
 		{
