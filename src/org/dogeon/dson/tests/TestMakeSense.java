@@ -95,6 +95,8 @@ public class TestMakeSense
         List<Visitor> visitors = (List<Visitor>)Shibe.makeSense("so such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"accounts\" is so -15.3 many wow and such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"accounts\" is so 42 very 3 also 0 many wow also such wow many", 
                 LinkedList.class, Visitor.class);
 	    
+	    assertEquals(3, visitors.size());
+	    
 	    Visitor visitor = visitors.get(0);
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
         assertEquals(1, visitor.getAccounts().length);
@@ -111,6 +113,35 @@ public class TestMakeSense
         assertEquals(false, visitor.getAnimalInfo().isDoge());
         
         visitor = visitors.get(2);
+        assertEquals(null, visitor.checkinDate);
+        assertEquals(null, visitor.getAccounts());
+        assertEquals(null, visitor.getAnimalInfo());
+	}
+	
+	@Test
+	public void testInstantiateArray() throws MakeSenseException
+	{
+	    Visitor[] visitors = (Visitor[])Shibe.makeSense("so such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"accounts\" is so -15.3 many wow and such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"accounts\" is so 42 very 3 also 0 many wow also such wow many",
+	            Visitor[].class);
+	    
+	    assertEquals(3, visitors.length);
+	    
+	    Visitor visitor = visitors[0];
+        assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
+        assertEquals(1, visitor.getAccounts().length);
+        assertEquals(-13.375, (Object)visitor.getAccounts()[0]);
+        assertEquals("inu", visitor.getAnimalInfo().getShiba());
+        assertEquals(true, visitor.getAnimalInfo().isDoge());
+        
+        visitor = visitors[1];
+        assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
+        assertEquals(2, visitor.getAccounts().length);
+        assertEquals(39304.0, (Object)visitor.getAccounts()[0]);
+        assertEquals(0.0, (Object)visitor.getAccounts()[1]);
+        assertEquals(null, visitor.getAnimalInfo().getShiba());
+        assertEquals(false, visitor.getAnimalInfo().isDoge());
+        
+        visitor = visitors[2];
         assertEquals(null, visitor.checkinDate);
         assertEquals(null, visitor.getAccounts());
         assertEquals(null, visitor.getAnimalInfo());

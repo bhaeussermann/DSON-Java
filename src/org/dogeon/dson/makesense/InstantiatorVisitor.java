@@ -70,7 +70,15 @@ public class InstantiatorVisitor implements ThingVisitor
 		InstantiatorContext context = contextStack.peek();
 		Class<?> componentClass = context.getComponentClass();
 		if ((componentClass != null) && (componentClass.isArray()))
-		    context.putValue(listContext.getBuilt());
+		{
+		    @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>)listContext.getBuilt();
+            Object array = Array.newInstance(context.getComponentClassComponentClass(), list.size());
+            int i = 0;
+            for (Object nextItem : list)
+                Array.set(array, i++, nextItem);
+		    context.putValue(array);
+		}
 	}
 	
 	
@@ -112,7 +120,7 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public Class<?> getComponentClassComponentClass()
 		{
-			return componentClass;
+			return componentClass == null ? c.getComponentType() : componentClass;
 		}
 		
 		public void putValue(Object value) 
@@ -225,17 +233,6 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public void putValue(Object value) 
 		{
-		    if (getComponentClass().isArray())
-		    {
-		        @SuppressWarnings("unchecked")
-                List<Object> list = (List<Object>)value;
-		        Object array = Array.newInstance(getComponentClassComponentClass(), list.size());
-		        int i = 0;
-		        for (Object nextItem : list)
-		            Array.set(array, i++, nextItem);
-		        value = array;
-		    }
-		    
 			try
 			{
 				if (currentSetterMethod != null)
@@ -306,7 +303,7 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public Class<?> getComponentClassComponentClass()
 		{
-			return null;
+		    return componentClass.getComponentType();
 		}
 		
 		public void putValue(Object value) 
