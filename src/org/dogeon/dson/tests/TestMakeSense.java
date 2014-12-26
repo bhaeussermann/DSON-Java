@@ -71,7 +71,7 @@ public class TestMakeSense
 		
 		visitor = (DogeThing)visitors.get(1);
 		assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.get("checkinDate"));
-		assertEquals(39304.0, visitor.get("account"));
+		assertEquals(17408.0, visitor.get("account"));
 		animalInfo = (DogeThing)visitor.get("animalInfo");
 		assertEquals(null, animalInfo.get("shiba"));
 		assertEquals(false, animalInfo.get("doge"));
@@ -100,7 +100,7 @@ public class TestMakeSense
 		visitor = result.getVisitors().get(1);
 		assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
 		assertEquals(2, visitor.getAccounts().length);
-		assertEquals(39304.0, (Object)visitor.getAccounts()[0]);
+		assertEquals(17408.0, (Object)visitor.getAccounts()[0]);
 		assertEquals(0.0, (Object)visitor.getAccounts()[1]);
 		assertEquals(null, visitor.getAnimalInfo().getShiba());
 		assertEquals(false, visitor.getAnimalInfo().isDoge());
@@ -130,7 +130,7 @@ public class TestMakeSense
         visitor = visitors.get(1);
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
         assertEquals(2, visitor.getAccounts().length);
-        assertEquals(39304.0, (Object)visitor.getAccounts()[0]);
+        assertEquals(17408.0, (Object)visitor.getAccounts()[0]);
         assertEquals(0.0, (Object)visitor.getAccounts()[1]);
         assertEquals(null, visitor.getAnimalInfo().getShiba());
         assertEquals(false, visitor.getAnimalInfo().isDoge());
@@ -159,7 +159,7 @@ public class TestMakeSense
         visitor = visitors[1];
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
         assertEquals(2, visitor.getAccounts().length);
-        assertEquals(39304.0, (Object)visitor.getAccounts()[0]);
+        assertEquals(17408.0, (Object)visitor.getAccounts()[0]);
         assertEquals(0.0, (Object)visitor.getAccounts()[1]);
         assertEquals(null, visitor.getAnimalInfo().getShiba());
         assertEquals(false, visitor.getAnimalInfo().isDoge());

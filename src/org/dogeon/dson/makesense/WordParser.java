@@ -66,7 +66,8 @@ public class WordParser
     	{
     		wordFinder.nextWord();
     		Object veryValue = wordFinder.nextWord().getWordValue();
-    		value = Math.pow(value instanceof Long ? (Long)value : (Double)value, veryValue instanceof Long ? (Long)veryValue : (Double)veryValue);
+    		double factor = Math.pow(8, veryValue instanceof Long ? (Long)veryValue : (Double)veryValue);
+    		value = (value instanceof Long) ? (Long)value * factor : (Double)value * factor;
     	}
     	visitor.visitValue(value);
     }
