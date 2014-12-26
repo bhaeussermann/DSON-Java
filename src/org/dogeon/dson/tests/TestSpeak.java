@@ -55,6 +55,8 @@ public class TestSpeak
         GregorianCalendar calendar = new GregorianCalendar(2014, 11, 6, 21, 5, 1);
         assertSpeak("\"2014-12-06T21:05:01.000Z\"", calendar.getTime());
         
+        assertSpeak("\"AQIDBAUGBwgJCg==\"", new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        
         assertSpeak("empty", null);
     }
     

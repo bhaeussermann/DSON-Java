@@ -40,9 +40,9 @@ public class ThingUtil
         else
         {
             Class<?> suchClass = thing.getClass();
-            if ((thing instanceof Number) || (suchClass == Boolean.class) || (suchClass == Character.class) || (suchClass == String.class) || (suchClass == Date.class))
+            if ((thing instanceof Number) || (suchClass == Boolean.class) || (suchClass == Character.class) || (suchClass == String.class) || (suchClass == Date.class) || (suchClass == byte[].class))
                 visitor.visitValue(thing);
-            else if (suchClass.isArray()) 
+            else if (suchClass.isArray())
             {
                 visitor.visitSuchList();
                 for (int i=0; i<Array.getLength(thing); i++)

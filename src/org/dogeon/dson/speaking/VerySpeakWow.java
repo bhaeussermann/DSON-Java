@@ -28,6 +28,8 @@ import java.util.Date;
 import org.dogeon.dson.Words;
 import org.dogeon.dson.util.ThingVisitor;
 
+import com.sun.org.apache.xml.internal.security.utils.Base64;
+
 public class VerySpeakWow implements ThingVisitor
 {
     private static final double LOG8 = Math.log(8);
@@ -75,8 +77,10 @@ public class VerySpeakWow implements ThingVisitor
             addToken(Words.qualifyString(Words.DATE_FORMAT.format((Date)value)));
         else if ((valueClass == String.class) || (valueClass == Character.class))
             addToken(Words.qualifyString(value.toString()));
+        else if (valueClass == byte[].class)
+            addToken(Words.qualifyString(Base64.encode((byte[])value)));
         else
-            addToken(value.toString());
+            addToken(Words.qualifyString(value.toString()));
     }
 
     public void visitMember(String name, int index)
