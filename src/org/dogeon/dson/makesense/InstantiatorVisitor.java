@@ -1,5 +1,6 @@
 package org.dogeon.dson.makesense;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -57,13 +58,19 @@ public class InstantiatorVisitor implements ThingVisitor
 		Object componentInstance = context.getComponentInstance();
 		Class<?> componentClassOfComponent = context.getComponentClassComponentClass();
 		InstantiatorContext newContext = componentInstance == null ? new ListContext(context.getComponentClass(), componentClassOfComponent) : new ListContext(componentInstance, componentClassOfComponent);
-		context.putValue(newContext.getBuilt());
+		if ((componentInstance != null) || (!context.getComponentClass().isArray()))
+		    context.putValue(newContext.getBuilt());
 		contextStack.push(newContext);
 	}
 
 	public void visitListWow() 
 	{
-		contextStack.pop();
+		InstantiatorContext listContext = contextStack.pop();
+		
+		InstantiatorContext context = contextStack.peek();
+		Class<?> componentClass = context.getComponentClass();
+		if ((componentClass != null) && (componentClass.isArray()))
+		    context.putValue(listContext.getBuilt());
 	}
 	
 	
@@ -75,6 +82,7 @@ public class InstantiatorVisitor implements ThingVisitor
 		public Class<?> getComponentClassComponentClass();
 		public void putValue(Object value);
 	}
+	
 	
 	private static class RootContext implements InstantiatorContext
 	{
@@ -113,6 +121,7 @@ public class InstantiatorVisitor implements ThingVisitor
 		}
 	}
 	
+	
 	private static class ThingContext implements InstantiatorContext
 	{
 		private Class<?> c;
@@ -141,6 +150,7 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public boolean setCurrentMemberName(String memberName)
 		{
+		    currentField = null;
 			currentGetterMethod = currentSetterMethod = null;
 			String setterMethodName = "set" + Character.toUpperCase(memberName.charAt(0)) + memberName.substring(1);
 			for (Method nextMethod : c.getMethods())
@@ -178,7 +188,9 @@ public class InstantiatorVisitor implements ThingVisitor
 		{
 			try 
 			{
-				return currentGetterMethod == null ? null : currentGetterMethod.invoke(thing);
+			    if (currentGetterMethod != null)
+			        return currentGetterMethod.invoke(thing);
+			    return currentField == null ? null : currentField.get(thing);
 			} 
 			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
 			{
@@ -188,19 +200,43 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public Class<?> getComponentClass()
 		{
-			return currentGetterMethod == null ? currentSetterMethod.getParameterTypes()[0] : currentGetterMethod.getReturnType();
+		    if (currentGetterMethod != null)
+		        return currentGetterMethod.getReturnType();
+		    if (currentField != null)
+		        return currentField.getType();
+			return currentSetterMethod.getParameterTypes()[0];
 		}
 		
 		public Class<?> getComponentClassComponentClass()
 		{
+		    Class<?> componentClass = getComponentClass(); 
+			if (componentClass.isArray())
+			    return componentClass.getComponentType();
 			
-		    ParameterizedType type = (ParameterizedType)(currentGetterMethod == null ? currentSetterMethod.getGenericParameterTypes()[0] : currentGetterMethod.getGenericReturnType());
+		    ParameterizedType type;
+		    if (currentGetterMethod != null)
+		        type = (ParameterizedType)currentGetterMethod.getGenericReturnType();
+		    else if (currentField != null)
+		        type = (ParameterizedType)currentField.getGenericType();
+		    else
+		        type = (ParameterizedType)currentSetterMethod.getGenericParameterTypes()[0];
 		    return (Class<?>)type.getActualTypeArguments()[0];
 		}
 		
 		public void putValue(Object value) 
 		{
-			try 
+		    if (getComponentClass().isArray())
+		    {
+		        @SuppressWarnings("unchecked")
+                List<Object> list = (List<Object>)value;
+		        Object array = Array.newInstance(getComponentClassComponentClass(), list.size());
+		        int i = 0;
+		        for (Object nextItem : list)
+		            Array.set(array, i++, nextItem);
+		        value = array;
+		    }
+		    
+			try
 			{
 				if (currentSetterMethod != null)
 					currentSetterMethod.invoke(thing, value);
@@ -213,6 +249,7 @@ public class InstantiatorVisitor implements ThingVisitor
 			}
 		}
 	}
+	
 	
 	private static class ListContext implements InstantiatorContext
 	{
@@ -244,7 +281,7 @@ public class InstantiatorVisitor implements ThingVisitor
 		{
 			try 
 			{
-				return listClass == List.class ? createInstance(ArrayList.class) : createInstance(listClass);
+				return (listClass.isArray()) || (listClass == List.class) ? createInstance(ArrayList.class) : createInstance(listClass);
 			} 
 			catch (InstantiationException e) 
 			{
