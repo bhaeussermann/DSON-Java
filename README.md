@@ -7,6 +7,8 @@ Supports both serialization and parsing. Properly converts all numbers from and 
 
 Some of the code uses names so as to make the code more understandable by Shiba Inu dogs.
 
+### Usage
+
 ```java
 public static class DogeExample
 {
@@ -30,6 +32,8 @@ public static class DogeExample
 }
 ```
 
+#### Shibe.speak()
+
 ```java
 DogeExample d = new DogeExample();
 d.setMany("wow");
@@ -43,6 +47,8 @@ System.out.println(Shibe.speak(d));
 ```
 such "many" is "wow","such" is so "foo" also "doge" and "inu" many wow
 ```
+
+#### Shibe.makeSense()
 
 ```java
 DogeThing d = (DogeThing)Shibe.makeSense("such \"many\" is \"wow\", \"such\" is so \"foo\" and \"doge\" and \"inu\" many wow");
