@@ -41,12 +41,20 @@ public class TestSpeak
         assertSpeak("\"a\"", 'a');
         assertSpeak("yes", true);
         assertSpeak("no", false);
+        
         assertSpeak("42", 34);
         assertSpeak("-15", -13);
+        assertSpeak("42.0", 34d);
         assertSpeak("15.3", 13.375);
         assertSpeak("-15.3", -13.375);
+        assertSpeak("3.0 very 13", 0.375 * Math.pow(8, 12));
+        assertSpeak("3.1 very 13", 0.390625 * Math.pow(8, 12));
+        assertSpeak("-3.1 very 13", -0.390625 * Math.pow(8, 12));
+        assertSpeak("3.1 very -15", 0.390625 * Math.pow(8, -12));
+        
         GregorianCalendar calendar = new GregorianCalendar(2014, 11, 6, 21, 5, 1);
         assertSpeak("\"2014-12-06T21:05:01.000Z\"", calendar.getTime());
+        
         assertSpeak("empty", null);
     }
     

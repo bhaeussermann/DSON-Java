@@ -30,6 +30,10 @@ import org.dogeon.dson.util.ThingVisitor;
 
 public class VerySpeakWow implements ThingVisitor
 {
+    private static final double LOG8 = Math.log(8);
+    private static final double MAX_FRACTION_DIGITS = 10;
+    private static final double EXPONENT_UPPER_THRESHOLD = Math.pow(8, MAX_FRACTION_DIGITS), EXPONENT_LOWER_THRESHOLD = Math.pow(8, -MAX_FRACTION_DIGITS);
+    
     private StringBuilder result = new StringBuilder();
 
     public String getSpeak()
@@ -52,9 +56,18 @@ public class VerySpeakWow implements ThingVisitor
         }
         else if ((valueClass == Float.class) || (valueClass == Double.class))
         {
-            double doubleValue = ((Number)value).doubleValue(); 
+            double doubleValue = ((Number)value).doubleValue();
             double absValue = Math.abs(doubleValue);
-            addToken((doubleValue < 0 ? "-" : "") + String.format("%1$o.%2$s", (long)absValue, fractionToOctal(absValue - (long)absValue)));
+            if ((absValue >= EXPONENT_UPPER_THRESHOLD) || (absValue <= EXPONENT_LOWER_THRESHOLD))
+            {
+                double exponent = Math.floor(Math.log(absValue) / LOG8);
+                String octalDigits = fractionToOctal(absValue / Math.pow(8, exponent + 1));
+                addToken((doubleValue < 0 ? "-" : "") + octalDigits.charAt(0) + '.' + (octalDigits.length() == 1 ? '0' : octalDigits.substring(1)));
+                addToken(Words.VERY[0]);
+                addToken((exponent < 0 ? "-" : "") + String.format("%1$o", Math.abs((int)exponent)));
+            }
+            else
+                addToken((doubleValue < 0 ? "-" : "") + String.format("%1$o.%2$s", (long)absValue, fractionToOctal(absValue - (long)absValue)));
         }
         else if (valueClass == Boolean.class)
             addToken((Boolean)value ? Words.YES_VALUE : Words.NO_VALUE);
@@ -113,7 +126,7 @@ public class VerySpeakWow implements ThingVisitor
     
     private static boolean isSeparatableCharacter(char c)
     {
-        return (Character.isLetterOrDigit(c)) || (c == '"'); 
+        return (Character.isLetterOrDigit(c)) || (c == '-') || (c == '+') || (c == '"'); 
     }
     
     private static String fractionToOctal(double fraction)
@@ -126,7 +139,7 @@ public class VerySpeakWow implements ThingVisitor
             s.append(digit);
             fraction-=digit;
         }
-        while ((fraction > 0) && (s.length() < 10));
+        while ((fraction > 0) && (s.length() < MAX_FRACTION_DIGITS));
         return s.toString();
     }
 }
