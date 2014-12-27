@@ -48,6 +48,8 @@ System.out.println(Shibe.speak(d));
 such "many" is "wow","such" is so "foo" also "doge" and "inu" many wow
 ```
 
+=====
+
 ```java
 DogeList list = new DogeList();
 list.add("foo");
@@ -81,6 +83,8 @@ foo
 doge
 inu
 ```
+
+=====
 
 ```java
 DogeExample d = (DogeExample)Shibe.makeSense("such \"many\" is \"wow\", \"such\" is so \"foo\" and \"doge\" and \"inu\" many wow", DogeExample.class);
