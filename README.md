@@ -34,6 +34,8 @@ public static class DogeExample
 
 #### Shibe.speak()
 
+Serializes an object.
+
 ```java
 DogeExample d = new DogeExample();
 d.setMany("wow");
@@ -68,6 +70,8 @@ such "many" is "wow","such" is so "foo" also "doge" and "inu" many wow
 ```
 
 #### Shibe.makeSense()
+
+Parses a DSON string.
 
 ```java
 DogeThing d = (DogeThing)Shibe.makeSense("such \"many\" is \"wow\", \"such\" is so \"foo\" and \"doge\" and \"inu\" many wow");
