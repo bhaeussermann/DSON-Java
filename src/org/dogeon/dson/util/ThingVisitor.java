@@ -25,12 +25,12 @@ package org.dogeon.dson.util;
 
 public interface ThingVisitor
 {
-    public void visitEmptySad();
-    public void visitValue(Object value);
-    public void visitMember(String name, int index);
-    public void visitSuchComposite();
-    public void visitCompositeWow();
-    public void visitSuchList();
-    public void visitListWow();
-    public void visitItem(int index);
+    public void visitEmptySad() throws VisitationException;
+    public void visitValue(Object value) throws VisitationException;
+    public void visitMember(String name, int index) throws VisitationException;
+    public void visitSuchComposite() throws VisitationException;
+    public void visitCompositeWow() throws VisitationException;
+    public void visitSuchList() throws VisitationException;
+    public void visitListWow() throws VisitationException;
+    public void visitItem(int index) throws VisitationException;
 }

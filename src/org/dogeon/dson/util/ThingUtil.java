@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class ThingUtil
 {
-    public static void walkThing(Object thing, ThingVisitor visitor)
+    public static void walkThing(Object thing, ThingVisitor visitor) throws VisitationException
     {
         if (thing == null)
             visitor.visitEmptySad();

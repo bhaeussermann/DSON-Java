@@ -75,7 +75,8 @@ public class TestSpeak
     @Test
     public void testThing()
     {
-        assertSpeak("such \"info\" is such \"and\" is \"also\",\"doge\" is yes.\"many\" is \"wow\"!\"shiba\" is \"inu\"?\"so\" is \"many\",\"such\" is empty wow wow", new Animal(new AnimalInfo("inu", true)));
+        assertSpeak("such \"info\" is such \"and\" is \"also\",\"doge\" is yes.\"many\" is \"wow\"!\"shiba\" is \"inu\"?\"so\" is \"many\",\"such\" is empty wow wow", 
+                new Animal(new AnimalInfo("inu", true)));
         
         HashMap<String, Object> inner = new HashMap<String, Object>();
         inner.put("shiba", "inu");

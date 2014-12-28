@@ -40,7 +40,7 @@ import org.junit.Test;
 public class TestMakeSense 
 {
     @Test
-    public void testSimple() throws MakeSenseException
+    public void testSimple()
     {
         String text = (String)Shibe.makeSense("\"some text\"");
         assertEquals("some text", text);
@@ -52,7 +52,7 @@ public class TestMakeSense
     }
     
 	@Test
-	public void testThing() throws MakeSenseException
+	public void testThing()
 	{
 		DogeThing result = (DogeThing)Shibe.makeSense("such \"address\" is \"123 \\\"fizz-buzz\\\"\", \"rooms\" is so many. \"visitors\" is so such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"account\" is -15.3 wow and such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"account\" is 42 very 3 wow also such wow many wow");
 		

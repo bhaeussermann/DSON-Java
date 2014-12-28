@@ -23,10 +23,13 @@
 
 package org.dogeon.dson.speaking;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Date;
 
 import org.dogeon.dson.Words;
 import org.dogeon.dson.util.ThingVisitor;
+import org.dogeon.dson.util.VisitationException;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
@@ -36,19 +39,20 @@ public class VerySpeakWow implements ThingVisitor
     private static final double MAX_FRACTION_DIGITS = 10;
     private static final double EXPONENT_UPPER_THRESHOLD = Math.pow(8, MAX_FRACTION_DIGITS), EXPONENT_LOWER_THRESHOLD = Math.pow(8, -MAX_FRACTION_DIGITS);
     
-    private StringBuilder result = new StringBuilder();
+    private Writer writer;
+    private String previousToken = null;
 
-    public String getSpeak()
+    public VerySpeakWow(Writer writer)
     {
-        return result.toString();
+        this.writer = writer;
     }
     
-    public void visitEmptySad()
+    public void visitEmptySad() throws VisitationException
     {
         addToken(Words.EMPTY_VALUE);
     }
 
-    public void visitValue(Object value)
+    public void visitValue(Object value) throws VisitationException
     {
         Class<?> valueClass = value.getClass();
         if ((valueClass == Byte.class) || (valueClass == Short.class) || (valueClass == Integer.class) || (valueClass == Long.class))
@@ -83,7 +87,7 @@ public class VerySpeakWow implements ThingVisitor
             addToken(Words.qualifyString(value.toString()));
     }
 
-    public void visitMember(String name, int index)
+    public void visitMember(String name, int index) throws VisitationException
     {
         if (index > 0)
             addToken(Words.MEMBER_SEPARATORS[(index - 1) % 4]);
@@ -91,41 +95,48 @@ public class VerySpeakWow implements ThingVisitor
         addToken(Words.VALUE_SEPARATOR);
     }
 
-    public void visitSuchComposite()
+    public void visitSuchComposite() throws VisitationException
     {
         addToken(Words.THING_BEGIN);
     }
 
-    public void visitCompositeWow()
+    public void visitCompositeWow() throws VisitationException
     {
         addToken(Words.THING_END);
     }
 
-    public void visitSuchList()
+    public void visitSuchList() throws VisitationException
     {
         addToken(Words.LIST_BEGIN);
     }
 
-    public void visitListWow()
+    public void visitListWow() throws VisitationException
     {
         addToken(Words.LIST_END);
     }
     
-    public void visitItem(int index)
+    public void visitItem(int index) throws VisitationException
     {
         if (index > 0)
             addToken(Words.ITEM_SEPARATORS[index == 1 ? 0 : 1]);
     }
     
     
-    private void addToken(String token)
+    private void addToken(String token) throws VisitationException
     {
-        if ((result.length() != 0) && 
-                (isSeparatableCharacter(token.charAt(0))) && (isSeparatableCharacter(result.charAt(result.length() - 1))))
+        try
         {
-            result.append(' ');
+            if ((previousToken != null) && 
+                    (isSeparatableCharacter(token.charAt(0))) && (isSeparatableCharacter(previousToken.charAt(previousToken.length() - 1))))
+            {
+                writer.append(' ');
+            }
+            writer.append(previousToken = token);
         }
-        result.append(token);
+        catch (IOException e)
+        {
+            throw new VisitationException(e);
+        }
     }
     
     private static boolean isSeparatableCharacter(char c)

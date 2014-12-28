@@ -26,30 +26,58 @@ package org.dogeon.dson;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import org.dogeon.dson.makesense.BuilderVisitor;
 import org.dogeon.dson.makesense.InstantiatorVisitor;
 import org.dogeon.dson.makesense.MakeSenseException;
 import org.dogeon.dson.makesense.WordParser;
+import org.dogeon.dson.speaking.SpeakException;
 import org.dogeon.dson.speaking.VerySpeakWow;
 import org.dogeon.dson.util.ThingUtil;
+import org.dogeon.dson.util.VisitationException;
 
 public class Shibe
 {
     public static String speak(Object obj)
     {
-        VerySpeakWow speak = new VerySpeakWow();
-        ThingUtil.walkThing(obj, speak);
-        return speak.getSpeak();
+        StringWriter writer = new StringWriter();
+        try
+        {
+            speak(obj, writer);
+        } 
+        catch (SpeakException e)
+        {
+            throw new RuntimeException(e);
+        }
+        return writer.toString();
     }
     
-    public static Object makeSense(String dson) throws MakeSenseException
+    public static void speak(Object obj, Writer writer) throws SpeakException
+    {
+        VerySpeakWow speak = new VerySpeakWow(writer);
+        try
+        {
+            ThingUtil.walkThing(obj, speak);
+        } 
+        catch (VisitationException e)
+        {
+            throw new SpeakException(e);
+        }
+    }
+    
+    public static Object makeSense(String dson)
     {
     	try 
     	{
 			return makeSense(new StringReader(dson));
 		} 
     	catch (IOException e) {}
+    	catch (MakeSenseException e)
+    	{
+    	    throw new RuntimeException(e);
+    	}
     	return null;
     }
     
