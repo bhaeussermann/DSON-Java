@@ -91,7 +91,8 @@ inu
 =====
 
 ```java
-DogeExample d = (DogeExample)Shibe.makeSense("such \"many\" is \"wow\", \"such\" is so \"foo\" and \"doge\" and \"inu\" many wow", DogeExample.class);
+DogeExample d = (DogeExample)Shibe.makeSense("such \"many\" is \"wow\", \"such\" is so \"foo\" and \"doge\" and \"inu\" many wow", 
+	DogeExample.class);
 
 System.out.println(d.getMany());
 for (String next : d.getSuch())
