@@ -256,17 +256,33 @@ public class InstantiatorVisitor implements ThingVisitor
 		
 		public void putValue(Object value) 
 		{
-			try
-			{
-				if (currentSetterMethod != null)
-					currentSetterMethod.invoke(thing, value);
-				else if (currentField != null)
-				    currentField.set(thing, value);
-			} 
-			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
-			{
-				throw new RuntimeException(e);
-			}
+		    if ((currentSetterMethod != null) || (currentField != null))
+		    {
+			    Class<?> destinationType = currentSetterMethod != null ? currentSetterMethod.getParameterTypes()[0] : currentField.getType();
+			    if ((value != null) && (!destinationType.isAssignableFrom(value.getClass())))
+			    {
+			        if (destinationType == int.class)
+                        value = ((Number)value).intValue();
+                    else if (destinationType == short.class)
+                        value = ((Number)value).shortValue();
+                    else if (destinationType == byte.class)
+                        value = ((Number)value).byteValue();
+                    else if (destinationType == float.class)
+                        value = ((Number)value).floatValue();
+			    }
+			    
+			    try
+	            {
+    				if (currentSetterMethod != null)
+    					currentSetterMethod.invoke(thing, value);
+    				else if (currentField != null)
+    				    currentField.set(thing, value);
+	            } 
+	            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) 
+	            {
+	                throw new RuntimeException(e);
+	            }
+		    }
 		}
 	}
 	

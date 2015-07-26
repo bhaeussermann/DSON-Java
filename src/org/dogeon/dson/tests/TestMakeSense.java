@@ -40,6 +40,25 @@ import org.junit.Test;
 public class TestMakeSense 
 {
     @Test
+    public void testBad()
+    {
+        try
+        {
+            Shibe.makeSense("such such many");
+            fail("Should throw exception.");
+        }
+        catch (RuntimeException e)
+        {
+            assertTrue(e.getCause() instanceof MakeSenseException);
+            assertEquals("Expected wow; was THING_BEGIN.", e.getCause().getMessage());
+        }
+        catch (Exception e)
+        {
+            fail("Wrong exception.");
+        }
+    }
+    
+    @Test
     public void testSimple()
     {
         String text = (String)Shibe.makeSense("\"some text\"");
@@ -54,9 +73,24 @@ public class TestMakeSense
 	@Test
 	public void testThing()
 	{
-		DogeThing result = (DogeThing)Shibe.makeSense("such \"address\" is \"123 \\\"fizz-buzz\\\"\", \"rooms\" is so many. \"visitors\" is so such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"account\" is -15.3 wow and such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"account\" is 42 very 3 wow also such wow many wow");
+		DogeThing result = (DogeThing)Shibe.makeSense(
+		        "such \"rating\" is -1, \"storyCount\" is 2, \"windowCount\" is 7, \"area\" is 7.5, \"address\" is \"123 \\\"fizz-buzz\\\"\", "
+		        + "\"employees\" is so so many many, "
+		        + "\"rooms\" is so many. "
+		        + "\"visitors\" is so "
+		            + "such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"account\" is -15.3 wow and "
+		            + "such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"account\" is 42 very 3 wow also "
+		            + "such wow "
+		        + "many wow");
 		
+		assertEquals(-1l, result.get("rating"));
+		assertEquals(2l, result.get("storyCount"));
+		assertEquals(7l, result.get("windowCount"));
+		assertEquals(7.625, result.get("area"));
 		assertEquals("123 \"fizz-buzz\"", result.get("address"));
+		DogeList employees = (DogeList)result.get("employees");
+		assertEquals(1, employees.size());
+		assertEquals(0, ((DogeList)employees.get(0)).size());
 		DogeList rooms = (DogeList)result.get("rooms");
 		assertEquals(0, rooms.size());
 		DogeList visitors = (DogeList)result.get("visitors");
@@ -83,32 +117,46 @@ public class TestMakeSense
 	@Test
 	public void testInstantiateThing() throws MakeSenseException
 	{
-		DogeHotel result = (DogeHotel)Shibe.makeSense("such \"address\" is \"123 \\\"fizz-buzz\\\"\", \"rooms\" is so many. \"visitors\" is so such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"accounts\" is so -15.3 many wow and such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"accounts\" is so 42 very 3 also 0 many wow also such wow many wow", 
+		DogeHotel result = (DogeHotel)Shibe.makeSense(
+		        "such \"rating\" is -1, \"storyCount\" is 2, \"windowCount\" is 7, \"area\" is 7.5, \"address\" is \"123 \\\"fizz-buzz\\\"\", "
+		        + "\"qwer\" is such \"a\" is 0, \"b\" is so 1 many wow, "
+		        + "\"employees\" is so so many many, "
+		        + "\"rooms\" is so many. "
+		        + "\"visitors\" is so "
+		            + "such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is \"inu\", \"doge\" is yes wow. \"accounts\" is so -15.3 many wow and "
+		            + "such \"checkinDate\" is \"2014-12-15T16:23:01.000Z\", \"animalInfo\" is such \"shiba\" is empty, \"doge\" is no wow. \"accounts\" is so 42 very 3 also 0 many wow also "
+		            + "such wow "
+	            + "many wow", 
 		        DogeHotel.class);
 		
+		assertEquals(-1, result.rating);
+		assertEquals(2, result.storyCount);
+		assertEquals(7, result.windowCount);
+		assertEquals(7.625, result.getArea(), 0.001);
 		assertEquals("123 \"fizz-buzz\"", result.getAddress());
+		assertEquals(1, result.employees.size());
+		assertEquals(0, result.employees.get(0).length);
 		assertEquals(0, result.getRooms().size());
 		assertEquals(3, result.getVisitors().size());
 		
 		Visitor visitor = result.getVisitors().get(0);
 		assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
-		assertEquals(1, visitor.getAccounts().length);
-		assertEquals(-13.375, (Object)visitor.getAccounts()[0]);
+		assertEquals(1, visitor.accounts.length);
+		assertEquals(-13.375, (Object)visitor.accounts[0]);
 		assertEquals("inu", visitor.getAnimalInfo().getShiba());
 		assertEquals(true, visitor.getAnimalInfo().isDoge());
 		
 		visitor = result.getVisitors().get(1);
 		assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
-		assertEquals(2, visitor.getAccounts().length);
-		assertEquals(17408.0, (Object)visitor.getAccounts()[0]);
-		assertEquals(0.0, (Object)visitor.getAccounts()[1]);
-		assertEquals(null, visitor.getAnimalInfo().getShiba());
+		assertEquals(2, visitor.accounts.length);
+		assertEquals(17408.0, (Object)visitor.accounts[0]);
+		assertEquals(0.0, (Object)visitor.accounts[1]);
+		assertNull(visitor.getAnimalInfo().getShiba());
 		assertEquals(false, visitor.getAnimalInfo().isDoge());
 		
 		visitor = result.getVisitors().get(2);
-		assertEquals(null, visitor.checkinDate);
-		assertEquals(null, visitor.getAccounts());
-		assertEquals(null, visitor.getAnimalInfo());
+		assertNull(visitor.checkinDate);
+		assertNull(visitor.accounts);
 	}
 	
 	@Test
@@ -122,23 +170,22 @@ public class TestMakeSense
 	    
 	    Visitor visitor = visitors.get(0);
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
-        assertEquals(1, visitor.getAccounts().length);
-        assertEquals(-13.375, (Object)visitor.getAccounts()[0]);
+        assertEquals(1, visitor.accounts.length);
+        assertEquals(-13.375, (Object)visitor.accounts[0]);
         assertEquals("inu", visitor.getAnimalInfo().getShiba());
         assertEquals(true, visitor.getAnimalInfo().isDoge());
         
         visitor = visitors.get(1);
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
-        assertEquals(2, visitor.getAccounts().length);
-        assertEquals(17408.0, (Object)visitor.getAccounts()[0]);
-        assertEquals(0.0, (Object)visitor.getAccounts()[1]);
-        assertEquals(null, visitor.getAnimalInfo().getShiba());
+        assertEquals(2, visitor.accounts.length);
+        assertEquals(17408.0, (Object)visitor.accounts[0]);
+        assertEquals(0.0, (Object)visitor.accounts[1]);
+        assertNull(visitor.getAnimalInfo().getShiba());
         assertEquals(false, visitor.getAnimalInfo().isDoge());
         
         visitor = visitors.get(2);
-        assertEquals(null, visitor.checkinDate);
-        assertEquals(null, visitor.getAccounts());
-        assertEquals(null, visitor.getAnimalInfo());
+        assertNull(visitor.checkinDate);
+        assertNull(visitor.accounts);
 	}
 	
 	@Test
@@ -151,31 +198,45 @@ public class TestMakeSense
 	    
 	    Visitor visitor = visitors[0];
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
-        assertEquals(1, visitor.getAccounts().length);
-        assertEquals(-13.375, (Object)visitor.getAccounts()[0]);
+        assertEquals(1, visitor.accounts.length);
+        assertEquals(-13.375, (Object)visitor.accounts[0]);
         assertEquals("inu", visitor.getAnimalInfo().getShiba());
         assertEquals(true, visitor.getAnimalInfo().isDoge());
         
         visitor = visitors[1];
         assertEquals((new GregorianCalendar(2014, 11, 15, 16, 23, 1)).getTime(), visitor.checkinDate);
-        assertEquals(2, visitor.getAccounts().length);
-        assertEquals(17408.0, (Object)visitor.getAccounts()[0]);
-        assertEquals(0.0, (Object)visitor.getAccounts()[1]);
-        assertEquals(null, visitor.getAnimalInfo().getShiba());
+        assertEquals(2, visitor.accounts.length);
+        assertEquals(17408.0, (Object)visitor.accounts[0]);
+        assertEquals(0.0, (Object)visitor.accounts[1]);
+        assertNull(visitor.getAnimalInfo().getShiba());
         assertEquals(false, visitor.getAnimalInfo().isDoge());
         
         visitor = visitors[2];
-        assertEquals(null, visitor.checkinDate);
-        assertEquals(null, visitor.getAccounts());
-        assertEquals(null, visitor.getAnimalInfo());
+        assertNull(visitor.checkinDate);
+        assertNull(visitor.accounts);
 	}
 	
 	
 	public static class DogeHotel
 	{
+	    public byte rating;
+	    public short storyCount;
+	    public int windowCount;
+	    private float area;
 		private String address;
+        public List<AnimalInfo[]> employees;
 		private List<Room> rooms;
 		private List<Visitor> visitors = new ArrayList<Visitor>();
+		
+		public float getArea()
+		{
+		    return area;
+		}
+		
+		public void setArea(float newArea)
+		{
+		    area = newArea;
+		}
 		
 		public String getAddress()
 		{
@@ -208,27 +269,12 @@ public class TestMakeSense
 	public static class Visitor 
 	{
 		public Date checkinDate;
-		private double[] accounts;
-		private AnimalInfo animalInfo;
-		
-		public double[] getAccounts()
-		{
-			return accounts;
-		}
-		
-		public void setAccounts(double[] newAccounts)
-		{
-			accounts = newAccounts;
-		}
+		public double[] accounts;
+		private AnimalInfo animalInfo = new AnimalInfo();
 		
 		public AnimalInfo getAnimalInfo()
 		{
 			return animalInfo;
-		}
-		
-		public void setAnimalInfo(AnimalInfo newAnimalInfo)
-		{
-			animalInfo = newAnimalInfo;
 		}
 	}
 	
